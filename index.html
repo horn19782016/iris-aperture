@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<head>
+     <title>17角光阑 2018年4月8日 向高斯致敬</title>
+    </head>
+
+     <body onload="draw()">
+        <canvas id="myCanvus" width="400px" height="400px" style="border:1px dashed black;">
+            出现文字表示你的浏览器不支持HTML5
+        </canvas>
+     </body>
+</html>
+<script type="text/javascript">
+<!--
+function draw(){
+	var canvas=document.getElementById('myCanvus');	
+	canvas.width=400;
+	canvas.height=400;	
+
+	context=canvas.getContext('2d');	
+	context.translate(200,200);
+
+	slot=new Slot();
+	animate();
+};
+
+var delta=0;	// 旋转角
+var radius=0;	// 旋转半径
+var outerRad=200;// 外径
+var context;	// 绘画上下文
+var slot;		// 光阑对象
+var angleCount=17;// 三角光阑为3，四角光阑为4，六角光阑为6
+
+function animate(){	
+	context.clearRect(-200,-200,400,400);// 清屏
+	
+	slot.update(radius,delta,outerRad);
+	slot.paintBg(context);
+	slot.paint(context);
+	slot.paintBase(context);
+		
+	delta+=0.5;
+	radius+=1;
+
+	if(radius<outerRad*0.99){		
+		window.requestAnimationFrame(animate);// 让浏览器自行决定帧速率
+	}
+}
+
+function Slot(){
+	var obj=new Object;
+
+	obj.ax=0;
+	obj.ay=0;
+	obj.bx=0;
+	obj.by=0;
+	obj.cx=0;
+	obj.cy=0;
+	obj.angleA=0;
+	obj.angleB=0;
+	obj.angleC=0;
+	obj.radius=0;
+	obj.outerRad=0;
+	obj.img=new Image();
+	obj.img.src="earth.jpg";    
+
+	// 计算
+	obj.update=function(radius,theta,outerRad){
+		this.radius=radius;
+		this.outerRad=outerRad;		
+
+		var alpha=Math.acos(radius/outerRad);
+		this.angleA=getRad(theta)+alpha;
+		this.ax=outerRad*Math.cos(this.angleA);
+		this.ay=outerRad*Math.sin(this.angleA);
+
+		var R=radius/Math.cos(Math.PI/angleCount);
+		this.angleB=getRad(theta)-Math.PI/angleCount;
+		
+		this.bx=R*Math.cos(this.angleB);
+		this.by=R*Math.sin(this.angleB);
+
+		this.angleC=this.angleA-2*Math.PI/angleCount;
+		this.cx=outerRad*Math.cos(this.angleC);
+		this.cy=outerRad*Math.sin(this.angleC);
+	};
+
+	// 画背景
+	obj.paintBg=function(ctx){
+		context.drawImage(this.img,0,0,800,800,-200,-200,400,400);
+	};
+
+	// 描光阑
+	obj.paint=function(ctx){
+
+		for(var i=0;i<angleCount;i++){
+            ctx.save();
+
+            ctx.fillStyle = getColor(i % 9);
+            ctx.rotate(2*Math.PI/angleCount*i);
+
+            ctx.beginPath();
+            ctx.moveTo(this.ax,this.ay);
+            ctx.lineTo(this.bx,this.by);
+			ctx.lineTo(this.cx,this.cy);
+            ctx.arc(0,0,this.outerRad,this.angleC,this.angleA,false);
+			ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
+	};
+
+	// 描基座
+	obj.paintBase=function(ctx){
+		ctx.strokeStyle = "black";
+
+		for(var i=0;i<4;i++){
+			ctx.save();
+			ctx.fillStyle = getColor(13);
+			ctx.rotate(Math.PI/2*i);
+
+			ctx.beginPath();
+			
+			ctx.arc(0,0,this.outerRad,0,Math.PI/2,false);
+			ctx.lineTo(this.outerRad,this.outerRad);
+			ctx.lineTo(this.outerRad,0);
+
+			ctx.closePath();
+			ctx.fill();
+
+			ctx.restore();
+		}
+	};
+
+	return obj;
+}
+
+// 角度得到弧度
+function getRad(degree){
+	return degree/180*Math.PI;
+}
+
+// 得到颜色
+function getColor(index){
+	var arr=["green","silver","lime","gray",
+			 "white","yellow","maroon","navy",
+			 "red","blue","purple","teal","fuchsia",
+			 "aqua","black"];
+
+	if(index>arr.length){
+		index=index % arr.length;
+	}
+
+	return arr[index];
+}
+
+//-->
+</script>
